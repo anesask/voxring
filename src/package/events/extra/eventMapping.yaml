@@ -1,0 +1,15 @@
+haptics:
+    record_start:
+        DEFAULT: sharp_state_change
+    record_pulse:
+        DEFAULT: subtle_collision
+    record_auto_stop:
+        DEFAULT: damp_state_change
+    transcription_complete:
+        DEFAULT: completed
+    dial_tick:
+        DEFAULT: subtle_collision
+    send_success:
+        DEFAULT: happy_alert
+    send_failure:
+        DEFAULT: angry_alert

@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoxRing</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #0a0a0a;
+    --text-dim: #6b6b6b;
+    --text-faint: #a0a0a0;
+    --border: #e5e5e5;
+    --border-hover: #cfcfcf;
+    --surface-soft: #fafafa;
+    --sidebar-bg: #f5f5f5;
+    --accent: #0a0a0a;
+    --success: #16a34a;
+    --warning: #d97706;
+    --error: #dc2626;
+    --radius: 3px;
+    --sidebar-w: 200px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI Variable', 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+  }
+
+  /* ── Layout ── */
+  .layout {
+    display: flex;
+    height: 100vh;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 28px 0 24px;
+  }
+
+  .sidebar-brand {
+    padding: 0 16px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .sidebar-brand h1 {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+  .sidebar-brand p {
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-top: 2px;
+  }
+
+  .sidebar nav {
+    padding: 0 8px;
+    flex: 1;
+  }
+  .sidebar nav a {
+    display: block;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-dim);
+    text-decoration: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 100ms, color 100ms;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .sidebar nav a:hover { background: var(--border); color: var(--text); }
+  .sidebar nav a.active {
+    background: var(--text);
+    color: #fff;
+    font-weight: 500;
+  }
+
+  /* ── Main content ── */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 48px 52px 96px;
+    scroll-behavior: smooth;
+  }
+
+  section {
+    padding: 44px 0;
+    border-top: 1px solid var(--border);
+    max-width: 660px;
+  }
+  section:first-of-type { padding-top: 0; border-top: none; }
+  section:last-of-type  { padding-bottom: 0; }
+
+  h2 {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .section-hint {
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-bottom: 28px;
+  }
+
+  .field { margin-bottom: 20px; }
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .label-hint {
+    color: var(--text-dim);
+    font-weight: 400;
+    margin-left: 6px;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  input[type="number"],
+  select {
+    width: 100%;
+    height: 36px;
+    padding: 0 12px;
+    background: #fff;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-family: inherit;
+    line-height: 1;
+    outline: none;
+    transition: border-color 120ms ease, background 120ms ease;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='none' stroke='%230a0a0a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M1 1l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type="number"] { -moz-appearance: textfield; }
+
+  input::placeholder { color: var(--text-faint); }
+
+  input:hover, select:hover { border-color: var(--border-hover); }
+  input:focus, select:focus { border-color: var(--text); background: #fff; }
+  input:disabled, select:disabled, button:disabled {
+    opacity: 1;
+    cursor: not-allowed;
+    background: var(--surface-soft);
+    color: var(--text-faint);
+  }
+
+  .hint {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+  .hint.muted { color: var(--text-faint); }
+
+  button {
+    height: 36px;
+    padding: 0 14px;
+    background: var(--accent);
+    color: #fff;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 120ms, border-color 120ms, color 120ms;
+    white-space: nowrap;
+  }
+  button:hover:not(:disabled) { background: #333; border-color: #333; }
+
+  button.ghost {
+    background: #fff;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  button.ghost:hover:not(:disabled) { border-color: var(--text); background: var(--surface-soft); }
+
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .segmented {
+    display: flex;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .segmented label {
+    flex: 1;
+    height: 36px;
+    padding: 0 14px;
+    cursor: pointer;
+    text-align: center;
+    color: var(--text-dim);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 34px;
+    margin: 0;
+    background: #fff;
+    border-right: 1px solid var(--border);
+    transition: color 120ms, background 120ms;
+    user-select: none;
+  }
+  .segmented label:last-child { border-right: none; }
+  .segmented label:hover:not(.active) { background: var(--surface-soft); }
+  .segmented label.active { color: #fff; background: var(--accent); font-weight: 500; }
+
+  .pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .pill {
+    padding: 5px 10px;
+    font-size: 11px;
+    font-family: 'SF Mono', 'Cascadia Mono', 'JetBrains Mono', Consolas, monospace;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 120ms;
+    user-select: none;
+  }
+  .pill:hover { background: var(--surface-soft); color: var(--text); border-color: var(--text); }
+
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+  .status-row:last-of-type { border-bottom: none; }
+  .status-row .name { color: var(--text); font-weight: 500; flex: 0 0 auto; min-width: 70px; }
+  .status-row .value { color: var(--text-dim); flex: 1; }
+
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; background: var(--text-faint); }
+  .dot.ok    { background: var(--success); }
+  .dot.warn  { background: var(--warning); }
+  .dot.error { background: var(--error); }
+
+  .mono {
+    font-family: 'SF Mono', 'Cascadia Mono', 'JetBrains Mono', Consolas, monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    word-break: break-all;
+  }
+
+  .level-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .level-bar-fill { height: 100%; background: var(--text); transition: width 200ms; }
+
+  .mic-result {
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    display: none;
+  }
+  .mic-result.visible { display: block; }
+
+  .roadmap-list { margin: 0; padding-left: 20px; list-style: disc; }
+  .roadmap-list li { font-size: 14px; line-height: 1.55; color: var(--text-dim); margin-bottom: 8px; }
+  .roadmap-list li:last-child { margin-bottom: 0; }
+  .roadmap-list li strong { color: var(--text); font-weight: 500; }
+  .roadmap-list li::marker { color: var(--text-faint); }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: calc(var(--sidebar-w) + 50%);
+    transform: translateX(-50%) translateY(60px);
+    background: var(--text);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    opacity: 0;
+    transition: transform 200ms, opacity 200ms;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  .spinner {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border: 1.5px solid var(--border);
+    border-top-color: var(--text);
+    border-radius: 50%;
+    animation: spin 600ms linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h1>VoxRing</h1>
+      <p>Your voice, routed.</p>
+    </div>
+    <nav id="sidebar-nav">
+      <a href="#voice-capture">Voice Capture</a>
+      <a href="#speech-models">Speech Models</a>
+      <a href="#tts">Text-to-Speech</a>
+      <a href="#voice-notes">Voice Notes</a>
+      <a href="#ai">AI Formatting</a>
+      <a href="#destinations">Destinations</a>
+      <a href="#roadmap">What&rsquo;s next</a>
+    </nav>
+  </aside>
+
+  <!-- Main content -->
+  <div class="main" id="main-scroll">
+
+    <!-- Voice Capture -->
+    <section id="voice-capture">
+      <h2>Voice Capture</h2>
+      <p class="section-hint">How audio is recorded and transcribed.</p>
+
+      <div class="field">
+        <label for="microphone">Microphone</label>
+        <select id="microphone" onchange="settingChanged()">
+          <option value="-1">Loading&hellip;</option>
+        </select>
+        <div class="btn-row" style="margin-top:10px">
+          <button class="ghost" id="micTestBtn" onclick="toggleMicTest()">Test microphone</button>
+        </div>
+        <div class="mic-result" id="micTestResult">
+          <div id="micTestText" class="mono" style="color:var(--text);font-size:12px"></div>
+          <div class="level-bar"><div class="level-bar-fill" id="micLevel"></div></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="maxDuration">Max recording duration</label>
+        <div class="btn-row">
+          <select id="maxDuration" onchange="maxDurationChanged()" style="flex:0 0 auto">
+            <option value="30">30 seconds</option>
+            <option value="60">60 seconds</option>
+            <option value="90">90 seconds</option>
+            <option value="custom">Custom…</option>
+          </select>
+          <input type="number" id="maxDurationCustom" min="5" max="300" step="5" placeholder="seconds" style="display:none;width:110px" onchange="settingChanged()">
+          <span id="maxDurationUnit" style="display:none;font-size:13px;color:var(--text-dim)">seconds</span>
+        </div>
+        <div class="hint">Longer recordings take longer to transcribe (roughly linear). Custom range: 5-300 s.</div>
+      </div>
+
+      <div class="field">
+        <label>Noise gate</label>
+        <label style="display:flex;align-items:center;gap:10px;font-weight:normal;cursor:pointer">
+          <input type="checkbox" id="useNoiseGate" onchange="settingChanged()" style="width:18px;height:18px;cursor:pointer">
+          Silence background noise between words before transcription
+        </label>
+        <div class="hint">Helps in noisy environments. Frames below -38 dBFS are zeroed out before the speech engine sees them.</div>
+      </div>
+
+      <div class="field">
+        <label for="translateTargetLanguage">Translate output to</label>
+        <select id="translateTargetLanguage" onchange="settingChanged()">
+          <option value="">Off (keep original language)</option>
+          <option value="en">English</option>
+          <option value="de">Deutsch (German)</option>
+          <option value="fr">Français (French)</option>
+          <option value="es">Español (Spanish)</option>
+          <option value="it">Italiano (Italian)</option>
+          <option value="pt">Português (Portuguese)</option>
+          <option value="nl">Nederlands (Dutch)</option>
+          <option value="pl">Polski (Polish)</option>
+          <option value="ru">Русский (Russian)</option>
+          <option value="zh">中文 (Chinese)</option>
+        </select>
+        <div class="hint">Uses your configured AI provider to translate the transcript. Requires an API key.</div>
+      </div>
+
+      <div class="field">
+        <label>Clean filler words</label>
+        <label style="display:flex;align-items:center;gap:10px;font-weight:normal;cursor:pointer">
+          <input type="checkbox" id="useFillerWordCleaner" onchange="settingChanged()" style="width:18px;height:18px;cursor:pointer">
+          Strip filler sounds from transcripts (um, uh, hmm, er, äh)
+        </label>
+        <div class="hint">Removes common hesitation sounds. Does not remove real words.</div>
+      </div>
+
+      <div class="field">
+        <label for="caseTransform">Case transform</label>
+        <select id="caseTransform" onchange="settingChanged()">
+          <option value="None">No change</option>
+          <option value="Upper">UPPER CASE</option>
+          <option value="Lower">lower case</option>
+          <option value="Title">Title Case</option>
+        </select>
+        <div class="hint">Applied to every transcript after filler word cleaning.</div>
+      </div>
+
+      <div class="field">
+        <label>Speech engine</label>
+        <div class="segmented" id="engineGroup">
+          <label id="lbl-Whisper" onclick="selectEngine('Whisper')">Whisper</label>
+          <label id="lbl-Vosk" onclick="selectEngine('Vosk')">Vosk</label>
+        </div>
+        <div class="hint">Whisper &middot; more accurate, heavier. Vosk &middot; fast, lightweight.</div>
+      </div>
+
+      <div class="field" id="whisperModelField">
+        <label for="whisperModelSize">Whisper model size</label>
+        <select id="whisperModelSize" onchange="modelSizeChanged()">
+          <option value="Base">Base &middot; ~140 MB &middot; fast</option>
+          <option value="Small">Small &middot; ~460 MB &middot; better accuracy</option>
+        </select>
+        <div class="hint">Changing size will download the new model on next save.</div>
+      </div>
+
+      <div class="field">
+        <label for="language">Language</label>
+        <select id="language" onchange="settingChanged()">
+          <option value="auto">Auto-detect</option>
+          <option value="en">English</option>
+          <option value="de">Deutsch</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Speech Models -->
+    <section id="speech-models">
+      <h2>Speech Models</h2>
+      <p class="section-hint">Offline models used by the transcription engines.</p>
+
+      <div class="status-row">
+        <span class="dot" id="voskStatus"></span>
+        <span class="name">Vosk</span>
+        <span class="value" id="voskStatusText">checking&hellip;</span>
+      </div>
+      <div class="status-row">
+        <span class="dot" id="whisperStatus"></span>
+        <span class="name">Whisper</span>
+        <span class="value" id="whisperStatusText">checking&hellip;</span>
+      </div>
+
+      <div class="btn-row" style="margin-top:16px">
+        <button class="ghost" id="downloadBtn" onclick="downloadModels()">Download missing models</button>
+        <span id="downloadSpinner" style="display:none"><span class="spinner"></span></span>
+      </div>
+
+      <div class="field" style="margin-top:16px">
+        <label>Location</label>
+        <div class="mono" id="modelsPath">loading&hellip;</div>
+      </div>
+    </section>
+
+    <!-- Text-to-Speech -->
+    <section id="tts">
+      <h2>Text-to-Speech</h2>
+      <p class="section-hint">
+        Read Back speaks your transcripts aloud.<br>
+        VoxRing uses <strong>Piper</strong>, a neural offline engine that ships inside the plugin.<br>
+        The voice sounds natural, works without internet, and your audio never leaves the machine.<br>
+        <strong>SAPI</strong> (Windows&rsquo; built-in voices) is the automatic fallback if Piper is ever missing.
+      </p>
+
+      <div class="status-row">
+        <span class="dot" id="ttsActiveDot"></span>
+        <span class="name">Voice engine in use</span>
+        <span class="value" id="ttsActiveText">checking&hellip;</span>
+      </div>
+      <div class="status-row">
+        <span class="dot" id="piperBinDot"></span>
+        <span class="name">Piper engine</span>
+        <span class="value" id="piperBinText">checking&hellip;</span>
+      </div>
+      <div class="status-row">
+        <span class="dot" id="piperEnDot"></span>
+        <span class="name">English voice (Amy, medium)</span>
+        <span class="value" id="piperEnText">checking&hellip;</span>
+      </div>
+      <div class="status-row">
+        <span class="dot" id="piperDeDot"></span>
+        <span class="name">Deutsch voice (Thorsten, medium)</span>
+        <span class="value" id="piperDeText">checking&hellip;</span>
+      </div>
+
+      <div class="btn-row" style="margin-top:16px">
+        <button class="ghost" id="installPiperBtn" onclick="installPiper()">Install Piper</button>
+        <button class="ghost" id="testTtsEnBtn" onclick="testTts('en')">Test English</button>
+        <button class="ghost" id="testTtsDeBtn" onclick="testTts('de')">Test Deutsch</button>
+        <span id="piperSpinner" style="display:none"><span class="spinner"></span></span>
+      </div>
+
+      <div class="field" style="margin-top:16px">
+        <label>Location</label>
+        <div class="mono" id="ttsPath">loading&hellip;</div>
+      </div>
+
+      <div class="hint" style="margin-top:12px">
+        Voices: Amy (public domain, Blizzard 2011 corpus).
+        Thorsten (<a href="https://github.com/thorstenMueller/Thorsten-Voice" target="_blank" rel="noopener">Thorsten-Voice Dataset</a>, CC-BY 4.0).
+        Piper is <a href="https://github.com/rhasspy/piper" target="_blank" rel="noopener">MIT-licensed</a>.
+      </div>
+    </section>
+
+    <!-- Voice Notes -->
+    <section id="voice-notes">
+      <h2>Voice Notes</h2>
+      <p class="section-hint">Raw audio saved to disk without transcription.</p>
+
+      <div class="field">
+        <label for="voiceNoteSavePath">Save folder</label>
+        <div class="btn-row">
+          <input type="text" id="voiceNoteSavePath" placeholder="" style="flex:1;min-width:240px" onchange="settingChanged()">
+          <button class="ghost" onclick="browseVoiceNotesFolder()">Browse...</button>
+          <button class="ghost" onclick="openVoiceNotesFolder()">Show</button>
+          <button class="ghost" onclick="resetVoiceNotePath()">Default</button>
+        </div>
+        <div class="hint" id="voiceNoteHint">Leave empty to use default.</div>
+      </div>
+
+      <div class="field">
+        <label for="voiceNoteFilenamePattern">Filename format <span class="label-hint">.NET DateTime pattern</span></label>
+        <div class="btn-row">
+          <input type="text" id="voiceNoteFilenamePattern" placeholder="yyyy-MM-dd_HH-mm-ss" style="flex:1;min-width:240px" oninput="filenamePatternInput()" onchange="settingChanged()">
+          <button class="ghost" onclick="resetFilenamePattern()">Default</button>
+        </div>
+        <div class="pill-row">
+          <span class="pill" onclick="applyPattern('yyyy-MM-dd_HH-mm-ss')">yyyy-MM-dd_HH-mm-ss</span>
+          <span class="pill" onclick="applyPattern('yyyyMMdd_HHmmss')">yyyyMMdd_HHmmss</span>
+          <span class="pill" onclick="applyPattern('yyyy-MM-dd HH.mm.ss')">yyyy-MM-dd HH.mm.ss</span>
+          <span class="pill" onclick="applyPattern(&quot;'VoxRing_'yyyy-MM-dd_HH-mm-ss&quot;)">'VoxRing_'yyyy-MM-dd_HH-mm-ss</span>
+          <span class="pill" onclick="applyPattern(&quot;'Note_'yyyyMMdd'_'HHmm&quot;)">'Note_'yyyyMMdd'_'HHmm</span>
+        </div>
+        <div class="hint" id="filenamePreview"></div>
+        <div class="hint muted">Invalid Windows chars (: / \\ etc.) become _. Wrap literals in single quotes.</div>
+      </div>
+    </section>
+
+    <!-- AI Formatting -->
+    <section id="ai">
+      <h2>AI Formatting</h2>
+      <p class="section-hint">
+        Reformats transcripts per destination.<br>
+        Pick one active provider and paste its API key.<br>
+        The active provider handles Email, Slack, Discord, Teams, and Calendar.
+      </p>
+
+      <div class="field">
+        <label for="aiProvider">Active provider</label>
+        <select id="aiProvider" onchange="aiProviderChanged()">
+          <option value="Claude">Claude</option>
+          <option value="OpenAi">OpenAI GPT</option>
+          <option value="Gemini" disabled>Google Gemini (coming soon)</option>
+          <option value="DeepSeek" disabled>DeepSeek (coming soon)</option>
+          <option value="Perplexity" disabled>Perplexity (coming soon)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="claudeApiKey">Claude API key <span class="label-hint" id="claudeActive" style="display:none;color:#7cfc8e">active</span></label>
+        <div class="btn-row">
+          <input type="password" id="claudeApiKey" placeholder="sk-ant-&hellip;" style="flex:1;min-width:240px" onchange="apiKeyChanged('claudeApiKey')">
+          <button class="ghost" onclick="toggleVisibility('claudeApiKey')">Show</button>
+          <button class="ghost" id="testClaudeBtn" onclick="testAiProvider('Claude')">Test</button>
+        </div>
+        <div class="status-row" id="claudeStatus" style="display:none;border-bottom:none;padding-top:10px">
+          <span class="dot" id="claudeStatusDot"></span>
+          <span id="claudeStatusText"></span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="openAiApiKey">OpenAI API key <span class="label-hint" id="openAiActive" style="display:none;color:#7cfc8e">active</span></label>
+        <div class="btn-row">
+          <input type="password" id="openAiApiKey" placeholder="sk-&hellip;" style="flex:1;min-width:240px" onchange="apiKeyChanged('openAiApiKey')">
+          <button class="ghost" onclick="toggleVisibility('openAiApiKey')">Show</button>
+          <button class="ghost" id="testOpenAiBtn" onclick="testAiProvider('OpenAi')">Test</button>
+        </div>
+        <div class="status-row" id="openAiStatus" style="display:none;border-bottom:none;padding-top:10px">
+          <span class="dot" id="openAiStatusDot"></span>
+          <span id="openAiStatusText"></span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="geminiApiKey">Gemini API key <span class="label-hint">coming soon</span></label>
+        <div class="btn-row">
+          <input type="password" id="geminiApiKey" placeholder="unlocked when provider ships" disabled style="flex:1;min-width:240px">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="deepSeekApiKey">DeepSeek API key <span class="label-hint">coming soon</span></label>
+        <div class="btn-row">
+          <input type="password" id="deepSeekApiKey" placeholder="unlocked when provider ships" disabled style="flex:1;min-width:240px">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="perplexityApiKey">Perplexity API key <span class="label-hint">coming soon</span></label>
+        <div class="btn-row">
+          <input type="password" id="perplexityApiKey" placeholder="unlocked when provider ships" disabled style="flex:1;min-width:240px">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>AI reformatting</label>
+        <label style="display:flex;align-items:center;gap:10px;font-weight:normal;cursor:pointer">
+          <input type="checkbox" id="useAi" onchange="useAiChanged()" style="width:18px;height:18px;cursor:pointer">
+          Enable AI reformatting when sending to Email, Slack, Discord, Teams, and Calendar
+        </label>
+        <div class="hint">When off, the raw transcript is sent as-is. You can also toggle this from the device with the "Toggle AI" button.</div>
+      </div>
+
+      <div class="field">
+        <label>Custom prompts <span class="label-hint">optional, overrides built-in prompt per destination</span></label>
+        <div class="hint" style="margin-bottom:12px">Leave blank to use the default. Your prompt replaces the system instruction sent to the AI before your transcript.</div>
+
+        <label for="customPromptEmail" style="font-weight:normal;font-size:13px;margin-bottom:4px;display:block">Email</label>
+        <textarea id="customPromptEmail" rows="3" placeholder="Default: format as professional email with To/Subject/Body headers..." style="width:100%;box-sizing:border-box;margin-bottom:12px;font-family:inherit;font-size:13px;resize:vertical" onchange="customPromptChanged('Email')"></textarea>
+
+        <label for="customPromptSlack" style="font-weight:normal;font-size:13px;margin-bottom:4px;display:block">Slack</label>
+        <textarea id="customPromptSlack" rows="3" placeholder="Default: format as concise Slack message with Slack markdown..." style="width:100%;box-sizing:border-box;margin-bottom:12px;font-family:inherit;font-size:13px;resize:vertical" onchange="customPromptChanged('Slack')"></textarea>
+
+        <label for="customPromptDiscord" style="font-weight:normal;font-size:13px;margin-bottom:4px;display:block">Discord</label>
+        <textarea id="customPromptDiscord" rows="3" placeholder="Default: format as concise Discord message with Discord markdown..." style="width:100%;box-sizing:border-box;margin-bottom:12px;font-family:inherit;font-size:13px;resize:vertical" onchange="customPromptChanged('Discord')"></textarea>
+
+        <label for="customPromptTeams" style="font-weight:normal;font-size:13px;margin-bottom:4px;display:block">Teams</label>
+        <textarea id="customPromptTeams" rows="3" placeholder="Default: format as professional Teams message..." style="width:100%;box-sizing:border-box;margin-bottom:12px;font-family:inherit;font-size:13px;resize:vertical" onchange="customPromptChanged('Teams')"></textarea>
+
+        <label for="customPromptCalendar" style="font-weight:normal;font-size:13px;margin-bottom:4px;display:block">Calendar</label>
+        <textarea id="customPromptCalendar" rows="3" placeholder="Default: convert to calendar event JSON with title, start, end, location, description..." style="width:100%;box-sizing:border-box;font-family:inherit;font-size:13px;resize:vertical" onchange="customPromptChanged('Calendar')"></textarea>
+      </div>
+    </section>
+
+    <!-- Destinations -->
+    <section id="destinations">
+      <h2>Destinations</h2>
+      <p class="section-hint">Connect external services so Quick-Send buttons can post directly.</p>
+
+      <div class="field">
+        <label>Email client</label>
+        <div class="hint" style="margin-bottom:10px">How VoxRing sends formatted emails. Only one option works today; others are on the roadmap.</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label style="display:flex;align-items:center;gap:10px;font-weight:normal;cursor:pointer">
+            <input type="radio" name="emailClient" value="mailto" checked style="width:16px;height:16px">
+            <span>Default email client <span class="label-hint" style="color:#7cfc8e">active</span></span>
+          </label>
+          <div style="margin-left:26px;margin-bottom:4px" class="hint">Opens Outlook, Apple Mail, or whatever is set as your system default via <code>mailto:</code>.</div>
+          <label style="display:flex;align-items:center;gap:10px;font-weight:normal;opacity:0.45;cursor:not-allowed">
+            <input type="radio" name="emailClient" value="gmail" disabled style="width:16px;height:16px">
+            <span>Gmail <span class="label-hint">coming soon</span></span>
+          </label>
+          <div style="margin-left:26px;margin-bottom:4px" class="hint" style="opacity:0.45">Send via Gmail API with OAuth sign-in. No Outlook required.</div>
+          <label style="display:flex;align-items:center;gap:10px;font-weight:normal;opacity:0.45;cursor:not-allowed">
+            <input type="radio" name="emailClient" value="outlookApi" disabled style="width:16px;height:16px">
+            <span>Outlook API <span class="label-hint">coming soon</span></span>
+          </label>
+          <div style="margin-left:26px;margin-bottom:4px" class="hint" style="opacity:0.45">Send via Microsoft Graph API. Works headlessly, no email client window opens.</div>
+          <label style="display:flex;align-items:center;gap:10px;font-weight:normal;opacity:0.45;cursor:not-allowed">
+            <input type="radio" name="emailClient" value="smtp" disabled style="width:16px;height:16px">
+            <span>SMTP <span class="label-hint">coming soon</span></span>
+          </label>
+          <div style="margin-left:26px" class="hint" style="opacity:0.45">Send directly from any SMTP server. Bring your own credentials.</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="slackWebhookUrl">Slack incoming webhook</label>
+        <div class="btn-row">
+          <input type="password" id="slackWebhookUrl" placeholder="https://hooks.slack.com/services/&hellip;" style="flex:1;min-width:240px" onchange="webhookChanged('slackWebhookUrl')">
+          <button class="ghost" onclick="toggleVisibility('slackWebhookUrl')">Show</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="discordWebhookUrl">Discord webhook</label>
+        <div class="btn-row">
+          <input type="password" id="discordWebhookUrl" placeholder="https://discord.com/api/webhooks/&hellip;" style="flex:1;min-width:240px" onchange="webhookChanged('discordWebhookUrl')">
+          <button class="ghost" onclick="toggleVisibility('discordWebhookUrl')">Show</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Microsoft Teams webhook <span class="label-hint">coming soon</span></label>
+        <div class="btn-row">
+          <input type="password" placeholder="https://outlook.office.com/webhook/&hellip;" style="flex:1;min-width:240px" disabled>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Calendar</label>
+        <div class="hint">
+          Voice &rarr; AI formats as event JSON &rarr; opens in your default calendar app (Outlook, Windows Calendar, etc.) via a <code>.ics</code> file.<br>
+          No API key or sign-in needed. Works like Email's <code>mailto:</code> approach.
+        </div>
+      </div>
+    </section>
+
+    <!-- Roadmap -->
+    <section id="roadmap">
+      <h2>What&rsquo;s next</h2>
+      <p class="section-hint">Features on the roadmap for VoxRing.</p>
+
+      <ul class="roadmap-list">
+        <li><strong>Model library</strong> - browse and install Whisper sizes (Tiny / Base / Small / Medium / Large) and Vosk language packs from within the plugin.</li>
+        <li><strong>Custom model URL</strong> - import any ggml Whisper or Vosk model by URL, useful for specialized domains and fine-tuned variants.</li>
+        <li><strong>Vocabulary hints</strong> - add an initial prompt so Whisper transcribes names, jargon, and domain terms accurately.</li>
+        <li><strong>Voice assistant mode</strong> - two-way voice: ask a question, hear Claude answer through your speakers via text-to-speech.</li>
+        <li><strong>Transcript history</strong> - dial through recent transcripts on the device and re-send any of them without re-recording.</li>
+      </ul>
+    </section>
+
+  </div><!-- .main -->
+</div><!-- .layout -->
+
+<div class="toast" id="toast">Saved</div>
+
+<script>
+let currentSettings = {};
+
+// ── Scroll-spy ──────────────────────────────────────────────────────────────
+(function () {
+  const mainEl  = document.getElementById('main-scroll');
+  const navLinks = Array.from(document.querySelectorAll('#sidebar-nav a'));
+  const sections = Array.from(document.querySelectorAll('.main section[id]'));
+
+  function setActive(id) {
+    navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+  }
+
+  // Click: calculate offset relative to .main and scroll it directly
+  navLinks.forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const id = a.getAttribute('href').slice(1);
+      const target = document.getElementById(id);
+      if (!target) return;
+      const mainTop    = mainEl.getBoundingClientRect().top;
+      const targetTop  = target.getBoundingClientRect().top;
+      mainEl.scrollTo({ top: mainEl.scrollTop + (targetTop - mainTop) - 24, behavior: 'smooth' });
+    });
+  });
+
+  // Scroll-spy: find the last section whose top edge has passed 80px into .main.
+  // Special case: if scrolled to the very bottom, always activate the last section.
+  function onScroll() {
+    const atBottom = mainEl.scrollTop + mainEl.clientHeight >= mainEl.scrollHeight - 4;
+    if (atBottom) {
+      setActive(sections[sections.length - 1]?.id);
+      return;
+    }
+    const mainTop = mainEl.getBoundingClientRect().top;
+    let activeId  = sections[0]?.id;
+    for (const s of sections) {
+      if (s.getBoundingClientRect().top - mainTop <= 80) activeId = s.id;
+    }
+    setActive(activeId);
+  }
+
+  mainEl.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+
+// ── Settings ─────────────────────────────────────────────────────────────────
+async function loadSettings() {
+  try {
+    const [settingsResp, micsResp] = await Promise.all([
+      fetch('/api/settings'),
+      fetch('/api/microphones')
+    ]);
+    const settings = await settingsResp.json();
+    const mics = await micsResp.json();
+
+    currentSettings = settings;
+
+    selectEngineUI(settings.speechEngine);
+    document.getElementById('language').value = settings.language || 'auto';
+    document.getElementById('whisperModelSize').value = settings.whisperModelSize || 'Small';
+    applyMaxDuration(settings.maxRecordingSeconds || 30);
+    document.getElementById('useNoiseGate').checked = settings.useNoiseGate !== false;
+    document.getElementById('translateTargetLanguage').value = settings.translateTargetLanguage || '';
+    document.getElementById('useFillerWordCleaner').checked = settings.useFillerWordCleaner === true;
+    document.getElementById('caseTransform').value = settings.caseTransform || 'None';
+
+    // Voice Note save path
+    const vnInput = document.getElementById('voiceNoteSavePath');
+    vnInput.value = settings.voiceNoteSavePath || '';
+    vnInput.placeholder = settings.voiceNoteEffectivePath || '';
+    const vnHint = document.getElementById('voiceNoteHint');
+    if (settings.voiceNoteEffectivePath) {
+      vnHint.textContent = settings.voiceNoteSavePath
+        ? 'Using custom path.'
+        : 'Default: ' + settings.voiceNoteEffectivePath;
+    }
+
+    // Voice Note filename pattern
+    const vnPatternInput = document.getElementById('voiceNoteFilenamePattern');
+    vnPatternInput.value = settings.voiceNoteFilenamePattern || '';
+    vnPatternInput.placeholder = settings.voiceNoteDefaultPattern || 'yyyy-MM-dd_HH-mm-ss';
+    if (settings.voiceNoteFilenamePreview) {
+      document.getElementById('filenamePreview').textContent = 'Preview: ' + settings.voiceNoteFilenamePreview;
+    }
+
+    // Microphones
+    const micSelect = document.getElementById('microphone');
+    micSelect.innerHTML = '';
+    if (mics.devices.length === 0) {
+      micSelect.innerHTML = '<option value="-1">No microphones found</option>';
+    } else {
+      mics.devices.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.index;
+        opt.textContent = d.name + (d.channels > 1 ? ` (${d.channels}ch)` : '');
+        micSelect.appendChild(opt);
+      });
+      micSelect.value = settings.microphoneDevice >= 0 ? settings.microphoneDevice : mics.devices[0].index;
+    }
+
+    // API keys - masked values as placeholders when stored
+    if (settings.claudeApiKey) document.getElementById('claudeApiKey').placeholder = settings.claudeApiKey;
+    if (settings.openAiApiKey) document.getElementById('openAiApiKey').placeholder = settings.openAiApiKey;
+    if (settings.slackWebhookUrl) document.getElementById('slackWebhookUrl').placeholder = settings.slackWebhookUrl;
+    if (settings.discordWebhookUrl) document.getElementById('discordWebhookUrl').placeholder = settings.discordWebhookUrl;
+
+    if (settings.claudeConfigured) {
+      const cs = document.getElementById('claudeStatus');
+      cs.style.display = 'flex';
+      document.getElementById('claudeStatusDot').className = 'dot ok';
+      document.getElementById('claudeStatusText').textContent = 'API key configured';
+    }
+
+    if (settings.openAiConfigured) {
+      const os = document.getElementById('openAiStatus');
+      os.style.display = 'flex';
+      document.getElementById('openAiStatusDot').className = 'dot ok';
+      document.getElementById('openAiStatusText').textContent = 'API key configured';
+    }
+
+    // Provider dropdown + "active" badges
+    const provider = settings.aiProvider || 'Claude';
+    document.getElementById('aiProvider').value = provider;
+    document.getElementById('claudeActive').style.display = provider === 'Claude' ? 'inline' : 'none';
+    document.getElementById('openAiActive').style.display = provider === 'OpenAi' ? 'inline' : 'none';
+
+    // AI toggle + custom prompts
+    document.getElementById('useAi').checked = settings.useAi !== false;
+    for (const dest of ['Email', 'Slack', 'Discord', 'Teams', 'Calendar']) {
+      const el = document.getElementById('customPrompt' + dest);
+      if (el) el.value = settings['customPrompt' + dest] || '';
+    }
+
+    setModelStatus('voskStatus', 'voskStatusText', settings.voskPresent, settings.voskLoaded);
+    setModelStatus('whisperStatus', 'whisperStatusText', settings.whisperPresent, settings.whisperLoaded);
+
+    const anyMissing = !settings.voskPresent || !settings.whisperPresent;
+    document.getElementById('downloadBtn').textContent = anyMissing ? 'Download missing models' : 'Models up to date';
+    document.getElementById('downloadBtn').disabled = !anyMissing;
+
+    document.getElementById('modelsPath').textContent = settings.modelsPath || '(unknown)';
+
+    // Text-to-Speech
+    renderTtsStatus(settings);
+  } catch (e) {
+    console.error('Failed to load settings:', e);
+  }
+}
+
+function renderTtsStatus(settings) {
+  const activeDot = document.getElementById('ttsActiveDot');
+  const activeText = document.getElementById('ttsActiveText');
+  const backend = settings.ttsActiveBackend || 'None';
+  if (backend === 'Piper') {
+    activeDot.className = 'dot ok';
+    activeText.textContent = 'Piper (neural, offline)';
+  } else if (backend === 'Sapi') {
+    activeDot.className = 'dot warn';
+    activeText.textContent = 'SAPI (Windows built-in)';
+  } else {
+    activeDot.className = 'dot error';
+    activeText.textContent = 'none available';
+  }
+
+  setTtsDot('piperBinDot', 'piperBinText', settings.piperBinaryPresent, sourceLabel(settings.piperBinarySource), 'not installed');
+  setTtsDot('piperEnDot', 'piperEnText', settings.piperEnVoicePresent, sourceLabel(settings.piperEnVoiceSource), 'not installed');
+  setTtsDot('piperDeDot', 'piperDeText', settings.piperDeVoicePresent, sourceLabel(settings.piperDeVoiceSource), 'not installed');
+
+  const installBtn = document.getElementById('installPiperBtn');
+  if (settings.isInstallingPiper) {
+    installBtn.disabled = true;
+    installBtn.textContent = settings.piperInstallStatus || 'Installing…';
+    document.getElementById('piperSpinner').style.display = 'inline-block';
+  } else if (settings.piperFullyInstalled) {
+    installBtn.disabled = true;
+    installBtn.textContent = 'Piper installed';
+    document.getElementById('piperSpinner').style.display = 'none';
+  } else {
+    installBtn.disabled = false;
+    installBtn.textContent = settings.piperBinaryPresent ? 'Finish install' : 'Install Piper (~150 MB)';
+    document.getElementById('piperSpinner').style.display = 'none';
+  }
+
+  document.getElementById('ttsPath').textContent = settings.ttsPath || '(unknown)';
+}
+
+function sourceLabel(src) {
+  if (src === 'Bundled') return 'bundled with plugin';
+  if (src === 'Downloaded') return 'downloaded locally';
+  return 'installed';
+}
+
+function setTtsDot(dotId, textId, present, okText, missingText) {
+  const dot = document.getElementById(dotId);
+  const text = document.getElementById(textId);
+  if (present) {
+    dot.className = 'dot ok';
+    text.textContent = okText;
+  } else {
+    dot.className = 'dot error';
+    text.textContent = missingText;
+  }
+}
+
+async function installPiper() {
+  const btn = document.getElementById('installPiperBtn');
+  const spinner = document.getElementById('piperSpinner');
+  btn.disabled = true;
+  btn.textContent = 'Installing…';
+  spinner.style.display = 'inline-block';
+  try {
+    const resp = await fetch('/api/tts/install', { method: 'POST' });
+    const data = await resp.json();
+    if (data.ok) {
+      showToast('Piper install started');
+      pollPiperInstall();
+    } else {
+      showToast('Install failed: ' + (data.error || 'unknown'));
+      btn.disabled = false;
+      spinner.style.display = 'none';
+      loadSettings();
+    }
+  } catch (e) {
+    showToast('Install failed: ' + e.message);
+    btn.disabled = false;
+    spinner.style.display = 'none';
+  }
+}
+
+function pollPiperInstall() {
+  let ticks = 0;
+  const handle = setInterval(async () => {
+    ticks++;
+    await loadSettings();
+    const resp = await fetch('/api/settings');
+    const s = await resp.json();
+    if (!s.isInstallingPiper || ticks > 60) clearInterval(handle);
+  }, 3000);
+}
+
+async function testTts(lang) {
+  const btnId = lang === 'de' ? 'testTtsDeBtn' : 'testTtsEnBtn';
+  const btn = document.getElementById(btnId);
+  btn.disabled = true;
+  const original = btn.textContent;
+  btn.textContent = 'Speaking…';
+  try {
+    const resp = await fetch('/api/tts/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lang })
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      const langLabel = data.language === 'de' ? 'Deutsch' : 'English';
+      showToast(langLabel + ' via ' + (data.backend || 'TTS'));
+    } else {
+      showToast('Test failed: ' + (data.error || 'unknown'));
+    }
+  } catch (e) {
+    showToast('Test failed: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+}
+
+function selectEngine(engine) {
+  selectEngineUI(engine);
+  settingChanged();
+}
+
+function selectEngineUI(engine) {
+  document.querySelectorAll('#engineGroup label').forEach(l => l.classList.remove('active'));
+  const lbl = document.getElementById('lbl-' + engine);
+  if (lbl) lbl.classList.add('active');
+  currentSettings.speechEngine = engine;
+}
+
+function setModelStatus(dotId, textId, present, loaded) {
+  const dot = document.getElementById(dotId);
+  const text = document.getElementById(textId);
+  if (loaded) {
+    dot.className = 'dot ok';
+    text.textContent = 'loaded';
+  } else if (present) {
+    dot.className = 'dot warn';
+    text.textContent = 'downloaded, not loaded';
+  } else {
+    dot.className = 'dot error';
+    text.textContent = 'not downloaded';
+  }
+}
+
+async function settingChanged() {
+  const durationSel = document.getElementById('maxDuration').value;
+  const maxRecordingSeconds = durationSel === 'custom'
+    ? (parseInt(document.getElementById('maxDurationCustom').value) || 30)
+    : parseInt(durationSel);
+
+  const data = {
+    speechEngine: currentSettings.speechEngine,
+    language: document.getElementById('language').value,
+    microphoneDevice: parseInt(document.getElementById('microphone').value),
+    maxRecordingSeconds,
+    whisperModelSize: document.getElementById('whisperModelSize').value,
+    useNoiseGate: document.getElementById('useNoiseGate').checked,
+    translateTargetLanguage: document.getElementById('translateTargetLanguage').value,
+    useFillerWordCleaner: document.getElementById('useFillerWordCleaner').checked,
+    caseTransform: document.getElementById('caseTransform').value,
+    voiceNoteSavePath: document.getElementById('voiceNoteSavePath').value,
+    voiceNoteFilenamePattern: document.getElementById('voiceNoteFilenamePattern').value
+  };
+
+  try {
+    await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    showToast('Saved');
+    loadSettings();
+  } catch (e) {
+    showToast('Failed to save');
+  }
+}
+
+async function openVoiceNotesFolder() {
+  try {
+    const resp = await fetch('/api/open-voice-notes', { method: 'POST' });
+    const data = await resp.json();
+    if (data.ok) showToast('Opened folder');
+    else showToast('Failed to open: ' + (data.error || ''));
+  } catch (e) {
+    showToast('Failed to open folder');
+  }
+}
+
+async function browseVoiceNotesFolder() {
+  try {
+    const resp = await fetch('/api/pick-voice-notes-folder', { method: 'POST' });
+    const data = await resp.json();
+    if (data.ok && data.path) {
+      document.getElementById('voiceNoteSavePath').value = data.path;
+      showToast('Folder selected');
+      loadSettings();
+    } else if (data.cancelled) {
+      // user cancelled
+    } else {
+      showToast('Browse failed: ' + (data.error || 'unknown'));
+    }
+  } catch (e) {
+    showToast('Browse failed: ' + e.message);
+  }
+}
+
+function applyMaxDuration(seconds) {
+  const sel = document.getElementById('maxDuration');
+  const input = document.getElementById('maxDurationCustom');
+  const unit = document.getElementById('maxDurationUnit');
+  if ([30, 60, 90].includes(seconds)) {
+    sel.value = String(seconds);
+    input.style.display = 'none';
+    unit.style.display = 'none';
+  } else {
+    sel.value = 'custom';
+    input.value = seconds;
+    input.style.display = 'inline-block';
+    unit.style.display = 'inline';
+  }
+}
+
+function maxDurationChanged() {
+  const sel = document.getElementById('maxDuration').value;
+  const input = document.getElementById('maxDurationCustom');
+  const unit = document.getElementById('maxDurationUnit');
+  if (sel === 'custom') {
+    input.style.display = 'inline-block';
+    unit.style.display = 'inline';
+    if (!input.value) input.value = 45;
+    input.focus();
+    settingChanged();
+  } else {
+    input.style.display = 'none';
+    unit.style.display = 'none';
+    settingChanged();
+  }
+}
+
+function resetVoiceNotePath() {
+  document.getElementById('voiceNoteSavePath').value = '';
+  settingChanged();
+}
+
+function resetFilenamePattern() {
+  document.getElementById('voiceNoteFilenamePattern').value = '';
+  filenamePatternInput();
+  settingChanged();
+}
+
+function applyPattern(pattern) {
+  document.getElementById('voiceNoteFilenamePattern').value = pattern;
+  filenamePatternInput();
+  settingChanged();
+}
+
+async function filenamePatternInput() {
+  const pattern = document.getElementById('voiceNoteFilenamePattern').value;
+  try {
+    const resp = await fetch('/api/preview-filename', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pattern })
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      document.getElementById('filenamePreview').textContent = 'Preview: ' + data.preview;
+    }
+  } catch (e) { /* non-critical */ }
+}
+
+let micTestActive = false;
+let micTestInterval = null;
+
+async function toggleMicTest() {
+  if (micTestActive) await stopMicTest();
+  else await startMicTest();
+}
+
+async function startMicTest() {
+  const btn = document.getElementById('micTestBtn');
+  const result = document.getElementById('micTestResult');
+  const text = document.getElementById('micTestText');
+  const level = document.getElementById('micLevel');
+
+  try {
+    const resp = await fetch('/api/mic-test-start', { method: 'POST' });
+    const data = await resp.json();
+    if (!data.ok) {
+      text.textContent = 'Error: ' + (data.error || 'unknown');
+      result.classList.add('visible');
+      return;
+    }
+
+    micTestActive = true;
+    btn.textContent = 'Stop';
+    btn.classList.remove('ghost');
+    result.classList.add('visible');
+    text.textContent = 'Listening…';
+    level.style.width = '0%';
+
+    micTestInterval = setInterval(pollMicLevel, 60);
+  } catch (e) {
+    text.textContent = 'Failed to start: ' + e.message;
+    result.classList.add('visible');
+  }
+}
+
+async function stopMicTest() {
+  const btn = document.getElementById('micTestBtn');
+  const level = document.getElementById('micLevel');
+
+  if (micTestInterval) { clearInterval(micTestInterval); micTestInterval = null; }
+  try { await fetch('/api/mic-test-stop', { method: 'POST' }); } catch (e) {}
+
+  micTestActive = false;
+  btn.textContent = 'Test microphone';
+  btn.classList.add('ghost');
+  level.style.width = '0%';
+}
+
+async function pollMicLevel() {
+  if (!micTestActive) return;
+  try {
+    const resp = await fetch('/api/mic-level');
+    const data = await resp.json();
+    if (!data.ok) return;
+
+    const level = document.getElementById('micLevel');
+    const text = document.getElementById('micTestText');
+
+    const pct = Math.max(0, Math.min(100, ((data.peakDb + 60) / 60) * 100));
+    level.style.width = pct + '%';
+    level.style.background = data.detected ? 'var(--success)' : 'var(--text)';
+
+    text.textContent = data.detected
+      ? `Peak ${data.peakDb} dB · audio detected`
+      : `Peak ${data.peakDb} dB · silent`;
+  } catch (e) { /* silent */ }
+}
+
+window.addEventListener('beforeunload', () => {
+  if (micTestActive) {
+    try { navigator.sendBeacon('/api/mic-test-stop'); } catch (e) {}
+  }
+});
+
+async function modelSizeChanged() {
+  await settingChanged();
+  await downloadModels();
+}
+
+async function downloadModels() {
+  const btn = document.getElementById('downloadBtn');
+  const spinner = document.getElementById('downloadSpinner');
+  btn.disabled = true;
+  btn.textContent = 'Downloading…';
+  spinner.style.display = 'inline-block';
+
+  try {
+    const resp = await fetch('/api/download-models', { method: 'POST' });
+    const data = await resp.json();
+    if (data.ok) {
+      showToast('Models downloaded');
+      loadSettings();
+    } else {
+      showToast('Download failed: ' + (data.error || 'unknown'));
+    }
+  } catch (e) {
+    showToast('Download failed: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+  }
+}
+
+function toggleVisibility(id) {
+  const input = document.getElementById(id);
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+async function apiKeyChanged(id) {
+  const value = document.getElementById(id).value;
+  if (!value) return;
+  const data = {};
+  data[id] = value;
+  try {
+    await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    showToast('API key saved');
+  } catch (e) {
+    showToast('Failed to save');
+  }
+}
+
+async function webhookChanged(id) {
+  const value = document.getElementById(id).value;
+  const data = {};
+  data[id] = value;
+  try {
+    await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    showToast(value ? 'Webhook saved' : 'Webhook cleared');
+  } catch (e) {
+    showToast('Failed to save');
+  }
+}
+
+async function aiProviderChanged() {
+  const provider = document.getElementById('aiProvider').value;
+  try {
+    const resp = await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ aiProvider: provider })
+    });
+    if (resp.ok) {
+      showToast('Active provider: ' + provider);
+      loadSettings();
+    } else {
+      showToast('Failed to save provider');
+    }
+  } catch (e) {
+    showToast('Save failed: ' + e.message);
+  }
+}
+
+async function useAiChanged() {
+  const enabled = document.getElementById('useAi').checked;
+  try {
+    await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ useAi: enabled })
+    });
+    showToast('AI reformatting ' + (enabled ? 'enabled' : 'disabled'));
+  } catch (e) {
+    showToast('Save failed: ' + e.message);
+  }
+}
+
+async function customPromptChanged(destName) {
+  const el = document.getElementById('customPrompt' + destName);
+  if (!el) return;
+  const prompt = el.value;
+  try {
+    const body = {};
+    body['customPrompt' + destName] = prompt;
+    await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    showToast(destName + ' prompt ' + (prompt.trim() ? 'saved' : 'cleared'));
+  } catch (e) {
+    showToast('Save failed: ' + e.message);
+  }
+}
+
+async function testAiProvider(providerId) {
+  const btnId    = providerId === 'OpenAi' ? 'testOpenAiBtn' : 'testClaudeBtn';
+  const statusId = providerId === 'OpenAi' ? 'openAiStatus'  : 'claudeStatus';
+  const dotId    = providerId === 'OpenAi' ? 'openAiStatusDot' : 'claudeStatusDot';
+  const textId   = providerId === 'OpenAi' ? 'openAiStatusText' : 'claudeStatusText';
+
+  const btn    = document.getElementById(btnId);
+  const status = document.getElementById(statusId);
+  const dot    = document.getElementById(dotId);
+  const text   = document.getElementById(textId);
+
+  btn.disabled = true;
+  btn.textContent = 'Testing…';
+  status.style.display = 'flex';
+  dot.className = 'dot warn';
+  text.textContent = 'Testing connection…';
+
+  try {
+    const resp = await fetch('/api/test-ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ provider: providerId })
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      dot.className = 'dot ok';
+      text.textContent = data.message;
+    } else {
+      dot.className = 'dot error';
+      text.textContent = 'Error: ' + (data.error || data.message || 'unknown');
+    }
+  } catch (e) {
+    dot.className = 'dot error';
+    text.textContent = 'Connection failed: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Test';
+  }
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+loadSettings();
+</script>
+</body>
+</html>
