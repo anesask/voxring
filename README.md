@@ -2,7 +2,7 @@
 
 **Hold. Speak. Release. Your voice, anywhere.**
 
-VoxRing is a voice-to-everything plugin for Logitech MX Master 4 and MX Creative Console. It turns a single mouse button into a dictation engine, an AI writing assistant, a voice commander, and a conversational AI — all offline by default.
+VoxRing is a voice-to-everything plugin for Logitech MX Master 4 and MX Creative Console. It turns a single mouse button into a dictation engine, an AI writing assistant, a voice commander, and a conversational AI: all offline by default.
 
 Built for the [Logitech DevStudio Challenge 2026](https://devstudiologitech2026.devpost.com), Actions SDK category. By Anes Mulalic.
 
@@ -10,22 +10,22 @@ Built for the [Logitech DevStudio Challenge 2026](https://devstudiologitech2026.
 
 ## What it does
 
-Hold the side button, speak, release. VoxRing transcribes your voice and routes the result to wherever you need it — clipboard, email, Slack, Discord, Teams, calendar, WhatsApp, Notion, or Telegram. AI reformats the transcript for each destination automatically. No keyboard required.
+Hold the side button, speak, release. VoxRing transcribes your voice and routes the result to wherever you need it: clipboard, email, Slack, Discord, Teams, calendar, WhatsApp, Notion, or Telegram. AI reformats the transcript for each destination automatically. No keyboard required.
 
 **33 actions across 8 groups:**
 
-- **Voice** — Dictate, Push to Talk, Voice Assistant, Voice Note, Read Back, Replay Last
-- **Send** — AI-formatted send to 9 destinations, transcript history folder
-- **Quick Send** — one-gesture voice-to-destination for 7 targets
-- **Text Tools** — AI toggle, Noise Gate, Filler Cleaner, Case Transform, Translate, Append, Edit, Regenerate
-- **Controls** — Mute Mic, Cancel, Open Voice Notes
-- **Settings** — Language Toggle, full settings panel
-- **Meters** — live audio level dial, rolling waveform, word count
-- **Utilities** — Guitar Tuner easter egg
+- **Voice**: Dictate, Push to Talk, Voice Assistant, Voice Note, Read Back, Replay Last
+- **Send**: AI-formatted send to 9 destinations, transcript history folder
+- **Quick Send**: one-gesture voice-to-destination for 7 targets
+- **Text Tools**: AI toggle, Noise Gate, Filler Cleaner, Case Transform, Translate, Append, Edit, Regenerate
+- **Controls**: Mute Mic, Cancel, Open Voice Notes
+- **Settings**: Language Toggle, full settings panel
+- **Meters**: live audio level dial, rolling waveform, word count
+- **Utilities**: Guitar Tuner easter egg
 
 **9 destinations:** Clipboard, Type Out, Email, Slack, Discord, Teams, Calendar, WhatsApp, Notion, Telegram.
 
-**5 AI providers:** Claude Sonnet, GPT-4o-mini, Gemini, DeepSeek, Perplexity — all behind a single interface.
+**5 AI providers:** Claude Sonnet, GPT-4o-mini, Gemini, DeepSeek, Perplexity: all behind a single interface.
 
 ---
 
@@ -41,11 +41,11 @@ On first launch, VoxRing downloads the speech recognition models (~500 MB total)
 
 Open the VoxRing Settings action in Logi Options+ to configure:
 
-- **Microphone** — select your preferred input device
-- **Speech engine** — Vosk (fast, 40 MB) or Whisper Small (accurate, 460 MB)
-- **Language** — Auto-detect, English, or German
-- **AI provider** — paste your API key for Claude, OpenAI, or any supported provider
-- **Destinations** — Slack and Discord webhook URLs, Teams webhook URL
+- **Microphone**: select your preferred input device
+- **Speech engine**: Vosk (fast, 40 MB) or Whisper Small (accurate, 460 MB)
+- **Language**: Auto-detect, English, or German
+- **AI provider**: paste your API key for Claude, OpenAI, or any supported provider
+- **Destinations**: Slack and Discord webhook URLs, Teams webhook URL
 
 All API keys and webhook URLs are encrypted at rest using Windows DPAPI.
 
@@ -53,7 +53,7 @@ All API keys and webhook URLs are encrypted at rest using Windows DPAPI.
 
 ## How it works
 
-Voice is captured via NAudio at 16 kHz. Speech recognition runs fully offline using Vosk or Whisper.net — no audio leaves your machine unless you opt into cloud AI formatting. When AI formatting is enabled, the transcript is sent to your chosen provider with a destination-specific prompt (email tone for email, Slack style for Slack, etc.). Text-to-speech for Voice Assistant mode uses Piper neural voices offline.
+Voice is captured via NAudio at 16 kHz. Speech recognition runs fully offline using Vosk or Whisper.net: no audio leaves your machine unless you opt into cloud AI formatting. When AI formatting is enabled, the transcript is sent to your chosen provider with a destination-specific prompt (email tone for email, Slack style for Slack, etc.). Text-to-speech for Voice Assistant mode uses Piper neural voices offline.
 
 See the repository wiki for architecture details, extension points, and how to add new destinations or AI providers.
 
