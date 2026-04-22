@@ -31,7 +31,7 @@ Hold the side button, speak, release. VoxRing transcribes your voice and routes 
 
 ## Installation
 
-Clone the repository and build from source (see [Building from source](#building-from-source) below).
+Download **[VoxRing-1.0.0.lplug4](https://github.com/anesask/voxring/releases/latest)** and double-click to install via Logi Options+. Requires Logi Options+ 6.0 or later. Windows only.
 
 On first launch, VoxRing downloads the speech recognition models (~500 MB total) and installs Piper TTS in the background. Recording is available immediately using the built-in Vosk model; Whisper loads once its download completes.
 
