@@ -55,7 +55,7 @@ All API keys and webhook URLs are encrypted at rest using Windows DPAPI.
 
 Voice is captured via NAudio at 16 kHz. Speech recognition runs fully offline using Vosk or Whisper.net — no audio leaves your machine unless you opt into cloud AI formatting. When AI formatting is enabled, the transcript is sent to your chosen provider with a destination-specific prompt (email tone for email, Slack style for Slack, etc.). Text-to-speech for Voice Assistant mode uses Piper neural voices offline.
 
-See [TECHNICAL.md](TECHNICAL.md) for architecture details, extension points, and how to add new destinations or AI providers.
+See the repository wiki for architecture details, extension points, and how to add new destinations or AI providers.
 
 ---
 
@@ -64,8 +64,8 @@ See [TECHNICAL.md](TECHNICAL.md) for architecture details, extension points, and
 Prerequisites: .NET 8 SDK, Logi Options+ installed.
 
 ```bash
-git clone https://github.com/anesask91/VoxRingPlugin.git
-cd VoxRingPlugin
+git clone https://github.com/anesask/voxring.git
+cd voxring
 dotnet build src/VoxRingPlugin.csproj
 ```
 
